@@ -24,17 +24,17 @@ void benchmark(){
 
 }
 void testContainsPoint(){
-    AABB aabb(XY(0, 0), 1);
-    assert(aabb.containsPoint(XY(0, 0)));
-    assert(!aabb.containsPoint(XY(1.1, 0)));
-    assert(!aabb.containsPoint(XY(-1.1, 0)));
-    assert(!aabb.containsPoint(XY(0, 1.1)));
-    assert(!aabb.containsPoint(XY(0, -1.1)));
+    AABB aabb(XYZ(0, 0, 0), 1);
+    assert(aabb.containsPoint(XYZ(0, 0, 0)));
+    assert(!aabb.containsPoint(XYZ(1.1, 0, 0)));
+    assert(!aabb.containsPoint(XYZ(-1.1, 0, 0)));
+    assert(!aabb.containsPoint(XYZ(0, 1.1, 0)));
+    assert(!aabb.containsPoint(XYZ(0, -1.1, 0)));
     std::cerr << "testContainsPoint() DONE\n";
 }
 void testInsert(){
-    QuadTree qt(AABB(XY(0, 0), 50));
-    qt.insert(XY(-25.5,25.5));
+    QuadTree qt(AABB(XYZ(0, 0, 0), 50));
+    qt.insert(XYZ(-25.5, 25.5, 0));
 
     assert(QuadTree::MAX_HEIGHT >= 2);
     assert(qt.isLeaf == false);
@@ -47,11 +47,11 @@ void testInsert(){
 
     std::cerr << "testInsert() DONE\n";
 }
-bool testXY(){
+bool testXYZ(){
     bool res;
-    XY p;
-    XY p1 = XY(1, 1);
-    XY p2 = p1;
+    XYZ p;
+    XYZ p1 = XYZ(1, 1, 0);
+    XYZ p2 = p1;
     // null
     assert(aprx(p.x, 0) && aprx(p.y, 0));
     assert(aprx(p1.x, 1) && aprx(p1.y, 1));
@@ -83,15 +83,15 @@ bool testXY(){
     assert(aprx(p1.x, 1) && aprx(p1.y, 1));
     assert(aprx(p2.x, 1) && aprx(p2.y, 1));
 
-    std::cerr << "testXY() DONE\n";
+    std::cerr << "testXYZ() DONE\n";
 }
 void testAABB(){
     bool res = true;;
     AABB a;
-    AABB a1(XY(10,11), 12);
+    AABB a1(XYZ(10, 11, 0), 12);
     AABB a2(a1);
-    AABB a3(XY(1,1),1);
-    AABB a4(XY(2,2),2);
+    AABB a3(XYZ(1, 1, 0),1);
+    AABB a4(XYZ(2, 2, 0),2);
 
     assert(aprx(a.center.x, 0) && aprx(a.center.y, 0) && aprx(a.halfSize, 0));
     assert(aprx(a2.center.x, 10) && aprx(a2.center.y, 11) && aprx(a2.halfSize, 12));
@@ -107,9 +107,9 @@ void testAABB(){
 }
 bool testQuadTree(){
     QuadTree q;
-    QuadTree q1(AABB(XY(25, 25), 25));
+    QuadTree q1(AABB(XYZ(25, 25, 0), 25));
     QuadTree q2(q1);
-    QuadTree q3(AABB(XY(0, 0), 10));
+    QuadTree q3(AABB(XYZ(0, 0, 0), 10));
 
     assert(aprx(q.boundary.center.x, 0) && aprx(q.boundary.center.y, 0));
    // res = res && aprx(q1.boundary.center.x, 25) && (q1.isLeaf && q2.isLeaf);
@@ -122,7 +122,7 @@ bool testQuadTree(){
 }
 
 void test(){
-    testXY();
+    testXYZ();
     testAABB();
     testContainsPoint();
     testInsert();
@@ -134,6 +134,6 @@ int main(){
 
     test();
 
-    QuadTree q(AABB(XY(0, 0), 50));
+    QuadTree q(AABB(XYZ(0, 0, 0), 50));
     q.subdivise();
 }

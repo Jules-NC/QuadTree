@@ -1,42 +1,48 @@
 #include <iostream>
 #include <memory> // for std::unique_ptr
 
-struct XY
+struct XYZ
 {
     float x;
     float y;
+    float z;
 
-    XY() : x(0), y(0) {
-    }
-    XY(float _x, float _y) : x(_x), y(_y) {}
-    XY(const XY& other): x(other.x), y(other.y) {}
-    XY& operator=(const XY& other);
-   // XY operator+(XY other);
-    XY operator+(const XY other);
+    XYZ() : x(0), y(0), z(0) {}
+    XYZ(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+    XYZ(const XYZ& other): x(other.x), y(other.y), z(other.z) {}
+    XYZ& operator=(const XYZ& other);
+    XYZ operator+(const XYZ other);
 
-    XY operator-(const XY other);
-    XY& operator+=(const XY & other);
-    XY& operator-=(const XY & other);
+    XYZ operator-(const XYZ other);
+    XYZ& operator+=(const XYZ & other);
+    XYZ& operator-=(const XYZ & other);
 
 
 };
 
 struct AABB{
-    XY center;
+    XYZ center;
     float halfSize;
 
-    AABB() : center(XY(0,0)), halfSize(0.f) {}
-    AABB(XY _center, float _halfSize) : center(_center), halfSize(_halfSize) {}
+    AABB() : center(XYZ(0, 0, 0)), halfSize(0.f) {}
+    AABB(XYZ _center, float _halfSize) : center(_center), halfSize(_halfSize) {}
     AABB(const AABB& other);
     AABB& operator=(const AABB& other);
 
-    bool containsPoint(XY point){
+    bool containsPoint(XYZ point){
         float min_x = center.x - halfSize;
         float max_x = center.x + halfSize;
+
         float min_y = center.y - halfSize;
         float max_y = center.y + halfSize;
 
-        return (point.x < max_x && point.x >= min_x && point.y < max_y && point.y >= min_y);
+        float min_z = center.z - halfSize;
+        float max_z = center.z + halfSize;
+
+
+        return (point.x < max_x && point.x >= min_x &&\
+                point.y < max_y && point.y >= min_y &&\
+                point.z < max_z && point.z >= min_z);
     }
 };
 
@@ -57,7 +63,7 @@ struct QuadTree{
     QuadTree& operator =(const QuadTree& other);
 
     void subdivise();
-    void insert(XY point);
+    void insert(XYZ point);
     int maxHeight();
 };
 
@@ -79,6 +85,7 @@ AABB::AABB(const AABB& other){
     center = other.center;
     halfSize = other.halfSize;
 }
+
 AABB& AABB::operator=(const AABB& other){
     if(this != &other){
         center = other.center;
@@ -88,28 +95,35 @@ AABB& AABB::operator=(const AABB& other){
 }
 
 
-XY& XY::operator =(const XY& other){
+XYZ& XYZ::operator =(const XYZ& other){
     if(this != &other){
         x = other.x;
         y = other.y;
+        z = other.z;
     }
     return *this;
 }
-XY XY::operator-(const XY other){
-    return XY(x-other.x, y-other.y);
+
+XYZ XYZ::operator-(const XYZ other){
+    return XYZ(x-other.x, y-other.y, z-other.z);
 }
-XY& XY::operator +=(const XY & other){
+
+XYZ& XYZ::operator +=(const XYZ & other){
     x += other.x;
     y += other.y;
+    z += other.z;
     return *this;
 }
-XY& XY::operator -=(const XY & other){
+
+XYZ& XYZ::operator -=(const XYZ & other){
     x -= other.x;
     y -= other.y;
+    z -= other.z;
     return *this;
 }
-XY XY::operator+(const XY other){
-    return XY(x+other.x, y+other.y);
+
+XYZ XYZ::operator+(const XYZ other){
+    return XYZ(x+other.x, y+other.y, z+other.z);
 }
 
 
@@ -120,12 +134,13 @@ void QuadTree::subdivise(){
 
     isLeaf = false;
 
-    XY center = boundary.center;
+    XYZ center = boundary.center;
+    float z = center.z;
     float next_halfsize = boundary.halfSize/2;
-    XY nw = center + XY(-next_halfsize, next_halfsize);
-    XY ne = center + XY(next_halfsize, next_halfsize);
-    XY sw = center + XY(-next_halfsize, -next_halfsize);
-    XY se = center + XY(next_halfsize, -next_halfsize);
+    XYZ nw = center + XYZ(-next_halfsize, next_halfsize, z);
+    XYZ ne = center + XYZ(next_halfsize, next_halfsize, z);
+    XYZ sw = center + XYZ(-next_halfsize, -next_halfsize, z);
+    XYZ se = center + XYZ(next_halfsize, -next_halfsize, z);
 
     //std::cout << "Center:\t" << center.x << ", " << center.y << ", " << i_ << std::endl;
 
@@ -135,7 +150,7 @@ void QuadTree::subdivise(){
     subTrees[3] = std::unique_ptr<QuadTree>(new QuadTree(AABB(se, next_halfsize), height+1));
 }
 
-void QuadTree::insert(XY point){
+void QuadTree::insert(XYZ point){
     // If point not in Quad -> out
     if(!boundary.containsPoint(point))
         return;
